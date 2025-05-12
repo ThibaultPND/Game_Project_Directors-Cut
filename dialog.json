@@ -1,0 +1,70 @@
+{
+    "scenes": [
+        {
+            "id": "scene1",
+            "speakers": [
+                "Thibault",
+                "Zaza"
+            ],
+            "lines": [
+                {
+                    "speaker": "Zaza",
+                    "text": "Je suis là."
+                },
+                {
+                    "speaker": "Thibault",
+                    "text": "La drogue, tu l'as ?"
+                },
+                {
+                    "speaker": "Zaza",
+                    "text": "Oui, je l'a."
+                },
+                {
+                    "speaker": "Thibault",
+                    "text": "Donne tout ça à Lola"
+                },
+                {
+                    "speaker": "Zaza",
+                    "text": "Elle est où ici, ou là ?"
+                },
+                {
+                    "speaker": "Thibault",
+                    "text": "Là."
+                }
+            ]
+        },
+        {
+            "id": "scene1",
+            "speakers": [
+                "Thibault",
+                "Slazaa"
+            ],
+            "lines": [
+                {
+                    "speaker": "Slazaa",
+                    "text": "Viens on fait un jeu en Odin"
+                },
+                {
+                    "speaker": "Thibault",
+                    "text": "Commence pas"
+                },
+                {
+                    "speaker": "Slazaa",
+                    "text": "Mais si tu vas aimer :pensive:"
+                },
+                {
+                    "speaker": "Thibault",
+                    "text": "C'est comme zig ?"
+                },
+                {
+                    "speaker": "Slazaa",
+                    "text": "Non, ça ressemble au C"
+                },
+                {
+                    "speaker": "Thibault",
+                    "text": "Vas-y"
+                }
+            ]
+        }
+    ]
+}
