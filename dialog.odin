@@ -1,5 +1,6 @@
 package main
 
+import "base:runtime"
 import "core:encoding/json"
 import "core:fmt"
 import "core:os"
@@ -14,11 +15,13 @@ Dialog_Pos :: [MAX_DIALOGS]i32
 
 Dialog_Scene :: struct {
 	active:     bool,
+	font:       rl.Font,
 	sprite:     Dialog_Sprite,
 	sprite_pos: Dialog_Pos,
 	line_text:  Dialog_Text,
 	count:      i32,
 	current:    i32,
+	// ? current_letter: i32
 }
 Dialog_Line :: struct {
 	text:   string,
@@ -42,6 +45,11 @@ load_dialog :: proc(filename: string) -> ^Dialog_Scene {
 		return nil
 	}
 	system := new(Dialog_Scene)
+	latin_1 := make([]rune, 223)
+	for i in 0 ..< len(latin_1) {
+		latin_1[i] = rune(32 + i)
+	}
+	system.font = rl.LoadFontEx("assets/arialbd.ttf", 32, &latin_1[0], 223)
 	system.active = false
 	system.count = i32(len(lines))
 	for i in 0 ..< system.count {
@@ -75,16 +83,48 @@ dialog_next :: proc(ds: ^Dialog_Scene) {
 
 dialog_draw :: proc(ds: ^Dialog_Scene) {
 	if ds.active {
-		dialog_height: i32 = WINDOW_HEIGHT / 6
+		dialog_height: i32 = WINDOW_HEIGHT / 5
 		dialog_width: i32 = WINDOW_WIDTH
 
 		rl.DrawRectangle(0, WINDOW_HEIGHT - dialog_height, dialog_width, dialog_height, rl.GRAY)
-		rl.DrawText(
-			strings.clone_to_cstring(ds.line_text[ds.current]),
-			30,
-			(WINDOW_HEIGHT - dialog_height) + 20,
-			24,
-			rl.BLACK,
-		)
+		line_texts := parse_current_line(ds)
+		for i in 0 ..< len(line_texts) {
+			line_text := strings.clone_to_cstring(line_texts[i])
+			defer delete(line_text)
+
+			row_size := rl.MeasureTextEx(ds.font, line_text, 30, 2)
+			rl.DrawTextEx(
+				ds.font,
+				line_text,
+				rl.Vector2 {
+					(WINDOW_WIDTH - row_size.x) / 2,
+					f32(WINDOW_HEIGHT - dialog_height) + f32(i) * (f32(row_size.y * 3) / 4),
+				},
+				30,
+				2,
+				rl.BLACK,
+			)
+		}
 	}
+}
+
+parse_current_line :: proc(ds: ^Dialog_Scene) -> [4]string {
+	returned_text: [4]string
+	text := ds.line_text[ds.current]
+	pos := 0
+	i := 0
+
+	for pos < len(text) && i < 4 {
+		row_s__width := 35
+		remaining := len(text) - pos
+		if row_s__width > remaining {
+			row_s__width = remaining
+		}
+
+		returned_text[i] = strings.cut(text, pos, pos + row_s__width)
+		pos += row_s__width
+		i += 1
+	}
+
+	return returned_text
 }
