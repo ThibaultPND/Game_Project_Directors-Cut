@@ -17,7 +17,7 @@ Button :: struct {
 	color:      rl.Color,
 	text_color: rl.Color,
 	state:      Button_State,
-	on_click:   proc(),
+	on_click:   proc(ds: ^Dialog_Scene),
 }
 
 button_init :: proc(
@@ -26,7 +26,7 @@ button_init :: proc(
 	text: cstring,
 	color: rl.Color,
 	text_color: rl.Color,
-	on_click: proc(),
+	on_click: proc(ds: ^Dialog_Scene),
 ) -> Button {
 	return Button {
 		rl.Rectangle{pos.x, pos.y, size.x, size.y},
@@ -59,17 +59,17 @@ buttons_draw :: proc(buttons: ^Buttons) {
 			i32(button.rect.height),
 			button_color,
 		)
-		rl.DrawText(button.text, i32(button.rect.x), i32(button.rect.y), 16, rl.BLACK)
+		rl.DrawText(button.text, i32(button.rect.x), i32(button.rect.y), 16, button.text_color)
 	}
 }
-buttons_update :: proc(buttons: ^Buttons) {
+buttons_update :: proc(buttons: ^Buttons, ds: ^Dialog_Scene) {
 	for &button in sa.slice(buttons) {
 		if cord_over_rect(rl.GetMousePosition(), button.rect) {
 			if rl.IsMouseButtonDown(.LEFT) {
 				button.state = .PRESSED
 			} else do button.state = .HOVERED
 			if rl.IsMouseButtonPressed(.LEFT) {
-				button.on_click()
+				button.on_click(ds)
 			}
 		} else {
 			button.state = .NONE
@@ -78,6 +78,6 @@ buttons_update :: proc(buttons: ^Buttons) {
 }
 
 // Exemple d'event lors du clic
-foo :: proc() {
-	fmt.println("pressed !")
+foo :: proc(ds: ^Dialog_Scene) {
+	dialog_next(ds)
 }
