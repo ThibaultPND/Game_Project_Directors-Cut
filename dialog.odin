@@ -88,6 +88,7 @@ dialog_draw :: proc(ds: ^Dialog_Scene) {
 
 		rl.DrawRectangle(0, WINDOW_HEIGHT - dialog_height, dialog_width, dialog_height, rl.GRAY)
 		line_texts := parse_current_line(ds)
+		defer delete(line_texts)
 		for i in 0 ..< len(line_texts) {
 			line_text := strings.clone_to_cstring(line_texts[i])
 			defer delete(line_text)
@@ -98,7 +99,8 @@ dialog_draw :: proc(ds: ^Dialog_Scene) {
 				line_text,
 				rl.Vector2 {
 					(WINDOW_WIDTH - row_size.x) / 2,
-					f32(WINDOW_HEIGHT - dialog_height) + f32(i) * (f32(row_size.y * 3) / 4),
+					f32(WINDOW_HEIGHT - (dialog_height * 3) / 4) +
+					f32(i) * (f32(row_size.y * 3) / 4),
 				},
 				30,
 				2,
@@ -108,23 +110,35 @@ dialog_draw :: proc(ds: ^Dialog_Scene) {
 	}
 }
 
-parse_current_line :: proc(ds: ^Dialog_Scene) -> [4]string {
-	returned_text: [4]string
+parse_current_line :: proc(ds: ^Dialog_Scene) -> [dynamic]string {
+	lines: [dynamic]string
 	text := ds.line_text[ds.current]
-	pos := 0
-	i := 0
 
-	for pos < len(text) && i < 4 {
-		row_s__width := 35
-		remaining := len(text) - pos
-		if row_s__width > remaining {
-			row_s__width = remaining
+	row_len := 35
+
+	for len(text) > 1 {
+		text = strings.trim(text," ")
+		len_to_cut := row_len
+		if len(text) < row_len {
+			len_to_cut = len(text)
+		}
+		// Si on coupe un mot :
+		if len_to_cut < len(text) - 1 && text[len_to_cut-1] != ' ' && text[len_to_cut] != ' ' {
+			start_len := len_to_cut
+			for len_to_cut > 0 && text[len_to_cut] != ' ' {
+				len_to_cut -= 1
+			}
+			if len_to_cut == 0 {
+				len_to_cut = start_len
+			}
 		}
 
-		returned_text[i] = strings.cut(text, pos, pos + row_s__width)
-		pos += row_s__width
-		i += 1
+		append(&lines, (strings.cut(text, 0, len_to_cut)))
+		if len(text) < row_len {
+			break
+		}
+		text = strings.cut(text, len_to_cut) // coupe le reste → plus de pos
 	}
 
-	return returned_text
+	return lines
 }
