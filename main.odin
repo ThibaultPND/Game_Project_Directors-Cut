@@ -15,8 +15,11 @@ main :: proc() {
 	rl.SetExitKey(.KEY_NULL)
 
 	game_init()
-	ds := load_dialog("assets/french.json")
+	ds := load_dialog("assets/dialogues/french.json")
 	defer delete_dialog(ds)
+
+	cam := new_camera()
+	defer free(cam)
 
 	es := load_entity()
 	defer free(es)
@@ -42,13 +45,17 @@ main :: proc() {
 			entity_update(es)
 			buttons_update(buttons, ds)
 			dialog_update(ds)
+			camera_update(cam, es.pos[player_id], es.size[player_id])
 		}
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RAYWHITE)
 
-		dialog_draw(ds)
+		rl.BeginMode2D(cam^)
 		entity_draw(es)
+		rl.EndMode2D()
+
+		dialog_draw(ds)
 		buttons_draw(buttons)
 		if state.paused {
 			rl.DrawText("PAUSE", 350, 280, 50, rl.RED)

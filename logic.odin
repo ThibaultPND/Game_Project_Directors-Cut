@@ -26,3 +26,8 @@ rects_overlap :: proc(a, b: rl.Rectangle) -> bool {
 dist :: proc(x, y, x2, y2: i32) -> i32 {
 	return abs(y2 - y) + abs(x2 - x)
 }
+
+// Fonction de lerp
+lerp :: proc(a, b, t: f32) -> f32 {
+	return a + t * (b - a)
+}
