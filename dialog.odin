@@ -1,6 +1,5 @@
 package main
 
-import "base:runtime"
 import "core:encoding/json"
 import "core:fmt"
 import "core:os"
@@ -13,15 +12,20 @@ Dialog_Sprite :: [MAX_DIALOGS]string
 Dialog_Text :: [MAX_DIALOGS]string
 Dialog_Pos :: [MAX_DIALOGS]i32
 
+
+@(private = "file")
+frame_counter: int
+
 Dialog_Scene :: struct {
-	active:     bool,
-	font:       rl.Font,
-	sprite:     Dialog_Sprite,
-	sprite_pos: Dialog_Pos,
-	line_text:  Dialog_Text,
-	count:      i32,
-	current:    i32,
-	// ? current_letter: i32
+	active:         bool,
+	font:           rl.Font,
+	sprite:         Dialog_Sprite,
+	sprite_pos:     Dialog_Pos,
+	line_text:      Dialog_Text,
+	count:          i32,
+	current:        i32,
+	text_speed:     i32,
+	current_letter: int,
 }
 Dialog_Line :: struct {
 	text:   string,
@@ -68,17 +72,35 @@ delete_dialog :: proc(ds: ^Dialog_Scene) {
 
 dialog_update :: proc(ds: ^Dialog_Scene) {
 	if ds.active {
-		if rl.IsKeyPressed(.SPACE) do ds.current += 1
+		if rl.IsKeyPressed(.SPACE) {
+			if ds.current_letter != len(ds.line_text[ds.current]) {
+				ds.current_letter = len(ds.line_text[ds.current])
+			} else {
+				dialog_next(ds)
+			}
+		}
 
 		if ds.line_text[ds.current] == "" {
 			ds.active = false
+		} else {
+			if int(ds.current_letter) != len(ds.line_text[ds.current]) {
+				frame_counter += 1
+				// TODO : Rendre modifiable dans les settings
+				letter_flow := 2
+				if frame_counter >= letter_flow {
+					ds.current_letter += 1
+					frame_counter = 0
+				}
+			}
 		}
 	}
+
 }
 
 dialog_next :: proc(ds: ^Dialog_Scene) {
 	ds.active = true
 	ds.current += 1
+	ds.current_letter = 1
 }
 
 dialog_draw :: proc(ds: ^Dialog_Scene) {
@@ -87,7 +109,9 @@ dialog_draw :: proc(ds: ^Dialog_Scene) {
 		dialog_width: i32 = WINDOW_WIDTH
 
 		rl.DrawRectangle(0, WINDOW_HEIGHT - dialog_height, dialog_width, dialog_height, rl.GRAY)
-		line_texts := parse_current_line(ds)
+
+		line := strings.cut(ds.line_text[ds.current], 0, ds.current_letter)
+		line_texts := parse_current_line(line)
 		defer delete(line_texts)
 		for i in 0 ..< len(line_texts) {
 			line_text := strings.clone_to_cstring(line_texts[i])
@@ -110,31 +134,34 @@ dialog_draw :: proc(ds: ^Dialog_Scene) {
 	}
 }
 
-parse_current_line :: proc(ds: ^Dialog_Scene) -> [dynamic]string {
+parse_current_line :: proc(text: string) -> [dynamic]string {
 	lines: [dynamic]string
-	text := ds.line_text[ds.current]
+	text := text
 
+	// TODO : Rendre modifiable dans les settings
 	row_len := 35
 
 	for len(text) > 1 {
-		text = strings.trim(text," ")
-		len_to_cut := row_len
-		if len(text) < row_len {
-			len_to_cut = len(text)
+		text = strings.trim_left(text, " ")
+		if len(text) <= row_len + 5 {
+			append(&lines, text)
+			break
 		}
-		// Si on coupe un mot :
-		if len_to_cut < len(text) - 1 && text[len_to_cut-1] != ' ' && text[len_to_cut] != ' ' {
-			start_len := len_to_cut
-			for len_to_cut > 0 && text[len_to_cut] != ' ' {
-				len_to_cut -= 1
+
+		len_to_cut := row_len
+		if len_to_cut < len(text) && text[len_to_cut] != ' ' && text[len_to_cut - 1] != ' ' {
+			i := len_to_cut
+			for i > 0 && text[i] != ' ' {
+				i -= 1
 			}
-			if len_to_cut == 0 {
-				len_to_cut = start_len
+			if i > 0 {
+				len_to_cut = i
 			}
 		}
 
-		append(&lines, (strings.cut(text, 0, len_to_cut)))
-		if len(text) < row_len {
+		append(&lines, strings.cut(text, 0, len_to_cut))
+		if len_to_cut >= len(text) {
+			text = ""
 			break
 		}
 		text = strings.cut(text, len_to_cut) // coupe le reste → plus de pos

@@ -5,6 +5,7 @@ import rl "vendor:raylib"
 
 MAX_BUTTON :: 50
 
+
 Button_State :: enum {
 	NONE,
 	HOVERED,
@@ -43,13 +44,16 @@ button_add :: proc(
 	buttons.color[id] = color
 	buttons.text_color[id] = text_color
 	buttons.on_click[id] = callback
-
+	
 	buttons.count += 1
 	return id
 }
 
 load_buttons :: proc() -> ^Buttons {
-	buttons := new(Buttons)
+	buttons, err := new(Buttons)
+	if true {
+		// ! Traiter l'erreur
+	}
 	return buttons
 }
 
