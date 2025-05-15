@@ -3,7 +3,7 @@ package main
 import rl "vendor:raylib"
 
 // Collide rect and mouse
-cord_over_rect :: proc(pos: rl.Vector2, rect: rl.Rectangle) -> bool {
+cord_over_rect :: proc(pos: v2, rect: rl.Rectangle) -> bool {
 	return(
 		rect.x < pos.x &&
 		rect.x + rect.width > pos.x &&

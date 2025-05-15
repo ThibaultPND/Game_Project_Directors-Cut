@@ -5,18 +5,18 @@ import rl "vendor:raylib"
 
 MAX_ENTITIES :: 100
 
-Entity_Pos :: [MAX_ENTITIES]rl.Vector2
+Entity_Pos :: [MAX_ENTITIES]v2
 Entity_Speed :: [MAX_ENTITIES]f32
-Entity_Size :: [MAX_ENTITIES]rl.Vector2
-Entity_Dir :: [MAX_ENTITIES]rl.Vector2
+Entity_Size :: [MAX_ENTITIES]v2
+Entity_Dir :: [MAX_ENTITIES]v2
 Entity_Color :: [MAX_ENTITIES]rl.Color
 
 // ? Est-ce que je dois garder une entité si elle n'est plus affiché ?
 // * Entity_Active :: [MAX_ENTITIES]bool 
 
 Entity :: struct {
-	pos:   rl.Vector2,
-	size:  rl.Vector2,
+	pos:   v2,
+	size:  v2,
 	color: rl.Color,
 }
 
@@ -27,6 +27,11 @@ EntitySystem :: struct {
 	dir:   Entity_Dir,
 	color: Entity_Color,
 	count: int,
+}
+
+load_entity :: proc() -> ^EntitySystem {
+	es := new(EntitySystem)
+	return es
 }
 
 add_entity :: proc(es: ^EntitySystem, e: Entity) -> i32 {
@@ -53,7 +58,7 @@ entity_update :: proc(es: ^EntitySystem) {
 	}
 }
 
-manage_colide :: proc(es: ^EntitySystem, delta: rl.Vector2, index: int) -> rl.Vector2 {
+manage_colide :: proc(es: ^EntitySystem, delta: v2, index: int) -> v2 {
 	delta := delta
 	if delta.x != 0 {
 		for j in 0 ..< es.count {

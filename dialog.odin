@@ -97,7 +97,7 @@ dialog_draw :: proc(ds: ^Dialog_Scene) {
 			rl.DrawTextEx(
 				ds.font,
 				line_text,
-				rl.Vector2 {
+				v2 {
 					(WINDOW_WIDTH - row_size.x) / 2,
 					f32(WINDOW_HEIGHT - (dialog_height * 3) / 4) +
 					f32(i) * (f32(row_size.y * 3) / 4),
