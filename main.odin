@@ -26,6 +26,18 @@ main :: proc() {
 	player_id := add_entity(es, Entity{pos = v2{200, 200}, size = v2{200, 64}, color = rl.BLUE})
 	add_entity(es, Entity{pos = v2{400, 400}, size = v2{64, 64}, color = rl.RED})
 
+	ss := new_sprite_system()
+	defer free(ss)
+
+	sprites_add(
+		ss,
+		v2{200, 500},
+		v2{1, 1},
+		rl.LoadTexture("assets/sprites/sprite_test.png"),
+		5,
+		true,
+	)
+
 	buttons := load_buttons()
 	defer free(buttons)
 	button_add(
@@ -42,6 +54,7 @@ main :: proc() {
 		game_update(es, player_id)
 
 		if !state.paused {
+			sprites_update(ss)
 			entity_update(es)
 			buttons_update(buttons, ds)
 			dialog_update(ds)
@@ -57,6 +70,7 @@ main :: proc() {
 
 		dialog_draw(ds)
 		buttons_draw(buttons)
+		sprites_draw(ss)
 		if state.paused {
 			rl.DrawText("PAUSE", 350, 280, 50, rl.RED)
 		}
