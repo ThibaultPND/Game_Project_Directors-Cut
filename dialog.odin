@@ -53,7 +53,7 @@ new_dialog_system :: proc(filename: string) -> ^Dialogs_System {
 	for i in 0 ..< len(latin_1) {
 		latin_1[i] = rune(32 + i)
 	}
-	system.font = rl.LoadFontEx("assets/arialbd.ttf", 32, &latin_1[0], 223)
+	system.font = rl.LoadFontEx("assets/fonts/arialbd.ttf", 32, &latin_1[0], 223)
 	system.active = false
 	system.count = i32(len(lines))
 	for i in 0 ..< system.count {
