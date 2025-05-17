@@ -66,7 +66,7 @@ game_update :: proc(game: ^Game) {
 	game.es.dir[0 + 1] = dir
 
 	if !game.paused {
-		sprites_update(game.ss, game.frame_count)
+		sprites_update(game.ss)
 		entity_update(game.es)
 		buttons_update(game.bs, game.ds)
 		dialog_update(game.ds)
@@ -81,7 +81,7 @@ game_render :: proc(game: ^Game) {
 
 	dialog_draw(game.ds)
 	buttons_draw(game.bs)
-	sprites_draw(game.ss, game.frame_count)
+	sprites_draw(game.ss)
 	if game.paused {
 		rl.DrawText("PAUSE", 350, 280, 50, rl.RED)
 	}
