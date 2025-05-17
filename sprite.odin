@@ -3,7 +3,7 @@ package main
 import rl "vendor:raylib"
 MAX_SPRITES :: 100
 
-Sprite_System :: struct {
+Sprites_System :: struct {
 	positions:     [MAX_SPRITES]v2,
 	scales:        [MAX_SPRITES]v2,
 	current_frame: [MAX_SPRITES]int,
@@ -13,12 +13,12 @@ Sprite_System :: struct {
 	count:         int,
 }
 
-new_sprite_system :: proc() -> ^Sprite_System {
-	return new(Sprite_System)
+new_sprites_system :: proc() -> ^Sprites_System {
+	return new(Sprites_System)
 }
 
 sprites_add :: proc(
-	ss: ^Sprite_System,
+	ss: ^Sprites_System,
 	position, scale: v2,
 	texture: rl.Texture2D,
 	max_frames: int,
@@ -34,15 +34,15 @@ sprites_add :: proc(
 	return ss.count
 }
 
-sprites_update :: proc(ss: ^Sprite_System) {
+sprites_update :: proc(ss: ^Sprites_System, frame_count: u32) {
 	for i in 0 ..< ss.count {
-		if ss.visible[i] {
+		if ss.visible[i] && (frame_count % 10) == 0 {
 			ss.current_frame[i] = (ss.current_frame[i] + 1) % ss.total_frame[i]
 		}
 	}
 }
 
-sprites_draw :: proc(ss: ^Sprite_System) {
+sprites_draw :: proc(ss: ^Sprites_System, frame_count: u32) {
 	for i in 0 ..< ss.count {
 		if ss.visible[i] {
 			frame := ss.current_frame[i]

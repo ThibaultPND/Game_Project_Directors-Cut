@@ -14,23 +14,9 @@ main :: proc() {
 	rl.SetTargetFPS(60)
 	rl.SetExitKey(.KEY_NULL)
 
-	game_init()
-	ds := load_dialog("assets/dialogues/french.json")
-	defer delete_dialog(ds)
-
-	cam := new_camera()
-	defer free(cam)
-
-	es := load_entity()
-	defer free(es)
-	player_id := add_entity(es, Entity{pos = v2{200, 200}, size = v2{200, 64}, color = rl.BLUE})
-	add_entity(es, Entity{pos = v2{400, 400}, size = v2{64, 64}, color = rl.RED})
-
-	ss := new_sprite_system()
-	defer free(ss)
-
+	game := game_init()
 	sprites_add(
-		ss,
+		game.ss,
 		v2{200, 500},
 		v2{1, 1},
 		rl.LoadTexture("assets/sprites/sprite_test.png"),
@@ -38,43 +24,16 @@ main :: proc() {
 		true,
 	)
 
-	buttons := load_buttons()
-	defer free(buttons)
-	button_add(
-		buttons,
-		pos = v2{100, 100},
-		size = v2{100, 200},
-		text = "click me",
-		color = rl.BLUE,
-		text_color = rl.WHITE,
-		callback = foo,
-	)
-
 	for !rl.WindowShouldClose() {
-		game_update(es, player_id)
-
-		if !state.paused {
-			sprites_update(ss)
-			entity_update(es)
-			buttons_update(buttons, ds)
-			dialog_update(ds)
-			camera_update(cam, es.pos[player_id], es.size[player_id])
-		}
+		game_update(&game)
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RAYWHITE)
 
-		rl.BeginMode2D(cam^)
-		entity_draw(es)
-		rl.EndMode2D()
+		game_render(&game)
 
-		dialog_draw(ds)
-		buttons_draw(buttons)
-		sprites_draw(ss)
-		if state.paused {
-			rl.DrawText("PAUSE", 350, 280, 50, rl.RED)
-		}
 		rl.EndDrawing()
 	}
 	rl.CloseWindow()
+	game_exit(&game)
 }

@@ -16,7 +16,7 @@ Dialog_Pos :: [MAX_DIALOGS]i32
 @(private = "file")
 frame_counter: int
 
-Dialog_Scene :: struct {
+Dialogs_System :: struct {
 	active:         bool,
 	font:           rl.Font,
 	sprite:         Dialog_Sprite,
@@ -33,7 +33,7 @@ Dialog_Line :: struct {
 	pos:    i32,
 }
 
-load_dialog :: proc(filename: string) -> ^Dialog_Scene {
+new_dialog_system :: proc(filename: string) -> ^Dialogs_System {
 	data, ok := os.read_entire_file_from_filename(filename)
 	if !ok {
 		fmt.eprintfln("Failed to load the lang : \"%s\" ", filename)
@@ -48,7 +48,7 @@ load_dialog :: proc(filename: string) -> ^Dialog_Scene {
 		fmt.eprintfln("Failed to unmarshall the file : \"%s\"", filename)
 		return nil
 	}
-	system := new(Dialog_Scene)
+	system := new(Dialogs_System)
 	latin_1 := make([]rune, 223)
 	for i in 0 ..< len(latin_1) {
 		latin_1[i] = rune(32 + i)
@@ -64,13 +64,13 @@ load_dialog :: proc(filename: string) -> ^Dialog_Scene {
 	}
 	return system
 }
-delete_dialog :: proc(ds: ^Dialog_Scene) {
+delete_dialog :: proc(ds: ^Dialogs_System) {
 	// ! : Verifier si il faut pas free le 
 	// ! sprite ou d'autres trucs comme ça.
 	free(ds)
 }
 
-dialog_update :: proc(ds: ^Dialog_Scene) {
+dialog_update :: proc(ds: ^Dialogs_System) {
 	if ds.active {
 		if rl.IsKeyPressed(.SPACE) {
 			if ds.current_letter != len(ds.line_text[ds.current]) {
@@ -97,13 +97,13 @@ dialog_update :: proc(ds: ^Dialog_Scene) {
 
 }
 
-dialog_next :: proc(ds: ^Dialog_Scene) {
+dialog_next :: proc(ds: ^Dialogs_System) {
 	ds.active = true
 	ds.current += 1
 	ds.current_letter = 1
 }
 
-dialog_draw :: proc(ds: ^Dialog_Scene) {
+dialog_draw :: proc(ds: ^Dialogs_System) {
 	if ds.active {
 		dialog_height: i32 = WINDOW_HEIGHT / 5
 		dialog_width: i32 = WINDOW_WIDTH

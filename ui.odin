@@ -12,57 +12,57 @@ Button_State :: enum {
 	PRESSED,
 	HIDED,
 }
-Buttons :: struct {
+Buttons_System :: struct {
 	rect:       [MAX_BUTTON]rl.Rectangle,
 	text:       [MAX_BUTTON]cstring,
 	color:      [MAX_BUTTON]rl.Color,
 	text_color: [MAX_BUTTON]rl.Color,
 	state:      [MAX_BUTTON]Button_State,
-	on_click:   [MAX_BUTTON]proc(ds: ^Dialog_Scene),
+	on_click:   [MAX_BUTTON]proc(ds: ^Dialogs_System),
 	count:      u32,
 }
 
 button_add :: proc(
-	buttons: ^Buttons,
+	Buttons_System: ^Buttons_System,
 	pos: v2,
 	size: v2,
 	text: cstring,
 	color: rl.Color,
 	text_color: rl.Color,
-	callback: proc(ds: ^Dialog_Scene),
+	callback: proc(ds: ^Dialogs_System),
 ) -> u32{
-	id := buttons.count
+	id := Buttons_System.count
 
-	buttons.rect[id] = rl.Rectangle {
+	Buttons_System.rect[id] = rl.Rectangle {
 		x      = pos.x,
 		y      = pos.y,
 		width  = size.x,
 		height = size.y,
 	}
-	buttons.state[id] = .NONE
-	buttons.text[id] = text
-	buttons.color[id] = color
-	buttons.text_color[id] = text_color
-	buttons.on_click[id] = callback
+	Buttons_System.state[id] = .NONE
+	Buttons_System.text[id] = text
+	Buttons_System.color[id] = color
+	Buttons_System.text_color[id] = text_color
+	Buttons_System.on_click[id] = callback
 	
-	buttons.count += 1
+	Buttons_System.count += 1
 	return id
 }
 
-load_buttons :: proc() -> ^Buttons {
-	buttons, err := new(Buttons)
+load_buttons :: proc() -> ^Buttons_System {
+	Buttons_System, err := new(Buttons_System)
 	if true {
 		// ! Traiter l'erreur
 	}
-	return buttons
+	return Buttons_System
 }
 
 // TODO : Gérer la fonction avec des images
-buttons_draw :: proc(buttons: ^Buttons) {
-	for i in 0 ..< buttons.count {
+buttons_draw :: proc(Buttons_System: ^Buttons_System) {
+	for i in 0 ..< Buttons_System.count {
 		button_color: rl.Color
 
-		switch buttons.state[i] {
+		switch Buttons_System.state[i] {
 		case .NONE:
 			button_color = rl.BLUE
 		case .HOVERED:
@@ -72,37 +72,37 @@ buttons_draw :: proc(buttons: ^Buttons) {
 		case .HIDED:
 		}
 		rl.DrawRectangle(
-			i32(buttons.rect[i].x),
-			i32(buttons.rect[i].y),
-			i32(buttons.rect[i].width),
-			i32(buttons.rect[i].height),
+			i32(Buttons_System.rect[i].x),
+			i32(Buttons_System.rect[i].y),
+			i32(Buttons_System.rect[i].width),
+			i32(Buttons_System.rect[i].height),
 			button_color,
 		)
 		rl.DrawText(
-			buttons.text[i],
-			i32(buttons.rect[i].x),
-			i32(buttons.rect[i].y),
+			Buttons_System.text[i],
+			i32(Buttons_System.rect[i].x),
+			i32(Buttons_System.rect[i].y),
 			16,
-			buttons.text_color[i],
+			Buttons_System.text_color[i],
 		)
 	}
 }
-buttons_update :: proc(buttons: ^Buttons, ds: ^Dialog_Scene) {
-	for i in 0 ..< buttons.count {
-		if cord_over_rect(rl.GetMousePosition(), buttons.rect[i]) {
+buttons_update :: proc(Buttons_System: ^Buttons_System, ds: ^Dialogs_System) {
+	for i in 0 ..< Buttons_System.count {
+		if cord_over_rect(rl.GetMousePosition(), Buttons_System.rect[i]) {
 			if rl.IsMouseButtonDown(.LEFT) {
-				buttons.state[i] = .PRESSED
-			} else do buttons.state[i] = .HOVERED
+				Buttons_System.state[i] = .PRESSED
+			} else do Buttons_System.state[i] = .HOVERED
 			if rl.IsMouseButtonPressed(.LEFT) {
-				buttons.on_click[i](ds)
+				Buttons_System.on_click[i](ds)
 			}
 		} else {
-			buttons.state[i] = .NONE
+			Buttons_System.state[i] = .NONE
 		}
 	}
 }
 
 // Exemple d'event lors du clic
-foo :: proc(ds: ^Dialog_Scene) {
+foo :: proc(ds: ^Dialogs_System) {
 	dialog_next(ds)
 }

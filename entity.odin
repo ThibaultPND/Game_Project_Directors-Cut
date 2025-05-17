@@ -20,7 +20,7 @@ Entity :: struct {
 	color: rl.Color,
 }
 
-EntitySystem :: struct {
+Entities_System :: struct {
 	pos:   Entity_Pos,
 	speed: Entity_Speed,
 	size:  Entity_Size,
@@ -29,12 +29,12 @@ EntitySystem :: struct {
 	count: int,
 }
 
-load_entity :: proc() -> ^EntitySystem {
-	es := new(EntitySystem)
+new_entities_system :: proc() -> ^Entities_System {
+	es := new(Entities_System)
 	return es
 }
 
-add_entity :: proc(es: ^EntitySystem, e: Entity) -> i32 {
+add_entity :: proc(es: ^Entities_System, e: Entity) -> i32 {
 	es.pos[es.count] = e.pos
 	es.size[es.count] = e.size
 	es.speed[es.count] = 300.0
@@ -45,7 +45,7 @@ add_entity :: proc(es: ^EntitySystem, e: Entity) -> i32 {
 	return i32(es.count - 1)
 }
 
-entity_update :: proc(es: ^EntitySystem) {
+entity_update :: proc(es: ^Entities_System) {
 	dt := rl.GetFrameTime()
 
 	for i in 0 ..< es.count {
@@ -58,7 +58,7 @@ entity_update :: proc(es: ^EntitySystem) {
 	}
 }
 
-manage_colide :: proc(es: ^EntitySystem, delta: v2, index: int) -> v2 {
+manage_colide :: proc(es: ^Entities_System, delta: v2, index: int) -> v2 {
 	delta := delta
 	if delta.x != 0 {
 		for j in 0 ..< es.count {
@@ -103,15 +103,15 @@ manage_colide :: proc(es: ^EntitySystem, delta: v2, index: int) -> v2 {
 	return delta
 }
 
-overlap_x :: proc(es: ^EntitySystem, i, j: int) -> bool {
+overlap_x :: proc(es: ^Entities_System, i, j: int) -> bool {
 	return es.pos[i].x + es.size[i].x > es.pos[j].x && es.pos[i].x < es.pos[j].x + es.size[j].x
 }
 
-overlap_y :: proc(es: ^EntitySystem, i, j: int) -> bool {
+overlap_y :: proc(es: ^Entities_System, i, j: int) -> bool {
 	return es.pos[i].y + es.size[i].y > es.pos[j].y && es.pos[i].y < es.pos[j].y + es.size[j].y
 }
 
-entity_draw :: proc(es: ^EntitySystem) {
+entity_draw :: proc(es: ^Entities_System) {
 	for i in 0 ..< es.count {
 		rl.DrawRectangleV(es.pos[i], es.size[i], es.color[i])
 	}
