@@ -30,9 +30,10 @@ game_init :: proc() -> Game {
 		pos = v2{100, 100},
 		size = v2{100, 200},
 		text = "click me",
-		color = rl.BLUE,
+		base_color = rl.BLUE,
 		text_color = rl.WHITE,
-		callback = foo,
+		on_click = foo,
+		user_data = game.ds,
 	)
 	return game
 }
@@ -58,17 +59,10 @@ game_update :: proc(game: ^Game) {
 	if rl.IsKeyDown(.W) do dir.y -= 1
 	game.es.dir[0] = dir
 
-	dir = rl.Vector2{0, 0}
-	if rl.IsKeyDown(.RIGHT) do dir.x += 1
-	if rl.IsKeyDown(.LEFT) do dir.x -= 1
-	if rl.IsKeyDown(.DOWN) do dir.y += 1
-	if rl.IsKeyDown(.UP) do dir.y -= 1
-	game.es.dir[0 + 1] = dir
-
 	if !game.paused {
 		sprites_update(game.ss)
 		entity_update(game.es)
-		buttons_update(game.bs, game.ds)
+		buttons_update(game.bs)
 		dialog_update(game.ds)
 		camera_update(game.cam, game.es.pos[0], game.es.size[0])
 	}
