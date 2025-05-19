@@ -14,19 +14,21 @@ Entity_Color :: [MAX_ENTITIES]rl.Color
 // ? Est-ce que je dois garder une entité si elle n'est plus affiché ?
 // * Entity_Active :: [MAX_ENTITIES]bool 
 
-Entity :: struct {
-	pos:   v2,
-	size:  v2,
-	color: rl.Color,
-}
-
 Entities_System :: struct {
-	pos:   Entity_Pos,
-	speed: Entity_Speed,
-	size:  Entity_Size,
-	dir:   Entity_Dir,
-	color: Entity_Color,
-	count: int,
+	pos:      [MAX_ENTITIES]v2,
+	size:     [MAX_ENTITIES]v2,
+	dir:      [MAX_ENTITIES]v2,
+	speed:    [MAX_ENTITIES]f32,
+	color:    [MAX_ENTITIES]rl.Color,
+	active:   [MAX_ENTITIES]bool,
+	tag:      [MAX_ENTITIES]Entity_Tag,
+	userdata: [MAX_ENTITIES]rawptr,
+	count:    int,
+}
+Entity_Tag :: enum {
+	PLAYER,
+	ENEMY,
+	NPC,
 }
 
 new_entities_system :: proc() -> ^Entities_System {
@@ -34,13 +36,23 @@ new_entities_system :: proc() -> ^Entities_System {
 	return es
 }
 
-add_entity :: proc(es: ^Entities_System, e: Entity) -> i32 {
-	es.pos[es.count] = e.pos
-	es.size[es.count] = e.size
-	es.speed[es.count] = 300.0
-	es.color[es.count] = e.color
-
+add_entity :: proc(
+	es: ^Entities_System,
+	pos, size: v2,
+	speed: f32,
+	color: rl.Color,
+	tag: Entity_Tag,
+) -> i32 {
+	index := es.count
 	es.count += 1
+
+	es.pos[index] = pos
+	es.size[index] = size
+	es.speed[index] = 300.0
+	es.color[index] = color
+	es.tag[index] = tag
+	es.active[index] = true
+	es.userdata[index] = nil
 
 	return i32(es.count - 1)
 }
@@ -53,8 +65,7 @@ entity_update :: proc(es: ^Entities_System) {
 
 		delta = manage_colide(es, delta, i)
 
-		es.pos[i].x += delta.x
-		es.pos[i].y += delta.y
+		es.pos[i] += delta
 	}
 }
 
@@ -113,6 +124,7 @@ overlap_y :: proc(es: ^Entities_System, i, j: int) -> bool {
 
 entity_draw :: proc(es: ^Entities_System) {
 	for i in 0 ..< es.count {
+		if !es.active[i] do continue
 		rl.DrawRectangleV(es.pos[i], es.size[i], es.color[i])
 	}
 }

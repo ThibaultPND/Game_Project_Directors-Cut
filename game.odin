@@ -7,7 +7,7 @@ Game :: struct {
 	paused:      bool,
 	frame_count: u32,
 	ds:          ^Dialogs_System,
-	cam:         ^rl.Camera2D,
+	cs:          ^Camera_System,
 	es:          ^Entities_System,
 	ss:          ^Sprites_System,
 	bs:          ^Buttons_System,
@@ -18,13 +18,27 @@ game_init :: proc() -> Game {
 		paused      = false,
 		frame_count = 0,
 		ds          = new_dialog_system("assets/dialogues/french.json"),
-		cam         = new_camera(),
+		cs          = new_camera(),
 		es          = new_entities_system(),
 		ss          = new_sprites_system(),
 		bs          = load_buttons(),
 	}
-	add_entity(game.es, Entity{pos = v2{200, 200}, size = v2{200, 64}, color = rl.BLUE})
-	add_entity(game.es, Entity{pos = v2{400, 400}, size = v2{64, 64}, color = rl.RED})
+	add_entity(
+		game.es,
+		pos = v2{200, 200},
+		size = v2{200, 64},
+		speed = 300,
+		color = rl.BLUE,
+		tag = .PLAYER,
+	)
+	add_entity(
+		game.es,
+		pos = v2{400, 400},
+		size = v2{64, 64},
+		speed = 300,
+		color = rl.RED,
+		tag = .ENEMY,
+	)
 	button_add(
 		game.bs,
 		pos = v2{100, 100},
@@ -40,7 +54,7 @@ game_init :: proc() -> Game {
 
 game_exit :: proc(game: ^Game) {
 	delete_dialog(game.ds)
-	free(game.cam)
+	free(game.cs)
 	free(game.es)
 	free(game.ss)
 	free(game.bs)
@@ -64,12 +78,20 @@ game_update :: proc(game: ^Game) {
 		entity_update(game.es)
 		buttons_update(game.bs)
 		dialog_update(game.ds)
-		camera_update(game.cam, game.es.pos[0], game.es.size[0])
+		camera_update(
+			game.cs,
+			rl.Rectangle {
+				game.es.pos[0].x,
+				game.es.pos[0].y,
+				game.es.size[0].x,
+				game.es.size[0].y,
+			},
+		)
 	}
 }
 
 game_render :: proc(game: ^Game) {
-	rl.BeginMode2D(game.cam^)
+	rl.BeginMode2D(game.cs.camera)
 	entity_draw(game.es)
 	rl.EndMode2D()
 
