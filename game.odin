@@ -11,6 +11,7 @@ Game :: struct {
 	es:          ^Entities_System,
 	ss:          ^Sprites_System,
 	bs:          ^Buttons_System,
+	rs:          ^Room_System,
 }
 
 game_init :: proc() -> Game {
@@ -22,29 +23,38 @@ game_init :: proc() -> Game {
 		es          = new_entities_system(),
 		ss          = new_sprites_system(),
 		bs          = load_buttons(),
+		rs          = room_init(),
 	}
 	add_entity(
 		game.es,
 		pos = v2{200, 200},
-		size = v2{200, 64},
+		size = v2{128, 128},
 		speed = 300,
 		color = rl.BLUE,
 		tag = .PLAYER,
 	)
 	add_entity(
 		game.es,
-		pos = v2{400, 400},
+		pos = v2{264, 564},
 		size = v2{64, 64},
 		speed = 300,
-		color = rl.RED,
+		color = rl.BLUE,
+		tag = .ENEMY,
+	)
+	add_entity(
+		game.es,
+		pos = v2{200, 500},
+		size = v2{64, 64},
+		speed = 300,
+		color = rl.BLUE,
 		tag = .ENEMY,
 	)
 	button_add(
 		game.bs,
-		pos = v2{100, 100},
-		size = v2{100, 200},
-		text = "click me",
-		base_color = rl.BLUE,
+		pos = v2{500, 20},
+		size = v2{50, 50},
+		text = "",
+		base_color = rl.ORANGE,
 		text_color = rl.WHITE,
 		on_click = foo,
 		user_data = game.ds,
@@ -58,6 +68,8 @@ game_exit :: proc(game: ^Game) {
 	free(game.es)
 	free(game.ss)
 	free(game.bs)
+	free(game.rs)
+	free(game.ds)
 }
 
 game_update :: proc(game: ^Game) {
@@ -75,23 +87,21 @@ game_update :: proc(game: ^Game) {
 
 	if !game.paused {
 		sprites_update(game.ss)
-		entity_update(game.es)
+		entity_update(game.es, game.rs)
 		buttons_update(game.bs)
 		dialog_update(game.ds)
+		room_update(game.rs)
 		camera_update(
 			game.cs,
-			rl.Rectangle {
-				game.es.pos[0].x,
-				game.es.pos[0].y,
-				game.es.size[0].x,
-				game.es.size[0].y,
-			},
+			rl.Rectangle{game.es.pos[0].x, game.es.pos[0].y, game.es.size[0].x, game.es.size[0].y},
 		)
 	}
 }
 
 game_render :: proc(game: ^Game) {
+
 	rl.BeginMode2D(game.cs.camera)
+	room_draw(game.rs,game.es.pos[0])
 	entity_draw(game.es)
 	rl.EndMode2D()
 

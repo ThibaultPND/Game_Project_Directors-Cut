@@ -66,7 +66,7 @@ buttons_draw :: proc(bs: ^Buttons_System) {
 
 		switch bs.state[i] {
 		case .NONE:
-			button_color = rl.BLUE
+			button_color = bs.base_color[i]
 		case .HOVERED:
 			button_color = rl.RED
 		case .PRESSED:

@@ -19,8 +19,8 @@ main :: proc() {
 	// ? Temporaire
 	sprites_add(
 		game.ss,
-		v2{100, 200},
-		v2{1, 1},
+		v2{10, 10},
+		v2{0.3, 0.3},
 		rl.LoadTexture("assets/sprites/sprite_test.png"),
 		v2{2042/8,261},
 		8,
