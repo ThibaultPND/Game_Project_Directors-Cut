@@ -28,35 +28,45 @@ game_init :: proc() -> Game {
 	add_entity(
 		game.es,
 		pos = v2{200, 200},
-		size = v2{128, 128},
+		size = v2{64, 64},
 		speed = 300,
 		color = rl.BLUE,
 		tag = .PLAYER,
 	)
 	add_entity(
 		game.es,
-		pos = v2{264, 564},
+		pos = v2{264, 500},
 		size = v2{64, 64},
 		speed = 300,
 		color = rl.BLUE,
-		tag = .ENEMY,
+		tag = .NPC,
 	)
 	add_entity(
 		game.es,
-		pos = v2{200, 500},
+		pos = v2{200, 436},
 		size = v2{64, 64},
 		speed = 300,
 		color = rl.BLUE,
-		tag = .ENEMY,
+		tag = .NPC,
 	)
 	button_add(
 		game.bs,
 		pos = v2{500, 20},
-		size = v2{50, 50},
-		text = "",
+		size = v2{80, 50},
+		text = "dialogue",
 		base_color = rl.ORANGE,
 		text_color = rl.WHITE,
 		on_click = foo,
+		user_data = game.ds,
+	)
+	button_add(
+		game.bs,
+		pos = v2{200, 20},
+		size = v2{70, 50},
+		text = "TRY ME",
+		base_color = rl.ORANGE,
+		text_color = rl.WHITE,
+		on_click = explosion_button,
 		user_data = game.ds,
 	)
 	return game
@@ -68,7 +78,7 @@ game_exit :: proc(game: ^Game) {
 	free(game.es)
 	free(game.ss)
 	free(game.bs)
-	free(game.rs)
+	quit_room_systme(game.rs)
 	free(game.ds)
 }
 
@@ -88,7 +98,7 @@ game_update :: proc(game: ^Game) {
 	if !game.paused {
 		sprites_update(game.ss)
 		entity_update(game.es, game.rs)
-		buttons_update(game.bs)
+		buttons_update(game.bs, game.ss)
 		dialog_update(game.ds)
 		room_update(game.rs)
 		camera_update(
@@ -101,7 +111,7 @@ game_update :: proc(game: ^Game) {
 game_render :: proc(game: ^Game) {
 
 	rl.BeginMode2D(game.cs.camera)
-	room_draw(game.rs,game.es.pos[0])
+	room_draw(game.rs, game.es.pos[0])
 	entity_draw(game.es)
 	rl.EndMode2D()
 

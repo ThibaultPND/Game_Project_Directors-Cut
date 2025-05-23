@@ -25,8 +25,9 @@ Tile_Type :: enum {
 // Structures de base
 //
 Tile :: struct {
-	type: Tile_Type,
-	data: rawptr,
+	type:   Tile_Type,
+	tex_id: int,
+	data:   rawptr,
 }
 
 Room_Layout :: struct {
@@ -57,6 +58,7 @@ Room_Connection :: struct {
 }
 
 Room_System :: struct {
+	tile_tex:       rl.Texture2D,
 	templates:      [MAX_ROOM_TEMPLATE]Room_Template,
 	instances:      [MAX_ACTIVE_ROOM]Room_Instance,
 	connections:    [dynamic]Room_Connection,
@@ -70,6 +72,7 @@ Room_System :: struct {
 //
 room_init :: proc() -> ^Room_System {
 	rs := new(Room_System)
+	rs.tile_tex = rl.LoadTexture("assets/tileset2.png")
 
 	room0 := load_room_from_png(rs, "assets/piece1.png", v2{0, 0})
 	room1 := load_room_from_png(rs, "assets/piece1.png", v2{1, 0})
@@ -82,6 +85,10 @@ room_init :: proc() -> ^Room_System {
 	return rs
 }
 
+quit_room_systme :: proc(rs: ^Room_System) {
+	rl.UnloadTexture(rs.tile_tex)
+	free(rs)
+}
 //
 // Mise à jour logique des salles
 //
@@ -105,7 +112,6 @@ room_draw :: proc(rs: ^Room_System, entity_pos: v2) {
 	active := &rs.instances[rs.active_room_id]
 	template := &rs.templates[active.template_id]
 	layout := &template.layout
-
 	for y in 0 ..< layout.height {
 		for x in 0 ..< layout.width {
 			tile := layout.tiles[y * layout.width + x]
@@ -113,33 +119,9 @@ room_draw :: proc(rs: ^Room_System, entity_pos: v2) {
 				active.position.x + f32(x * TILE_SIZE),
 				active.position.y + f32(y * TILE_SIZE),
 			}
-
-			switch tile.type {
-			case .WALL:
-				rl.DrawRectangle(i32(pos.x), i32(pos.y), TILE_SIZE, TILE_SIZE, rl.DARKGRAY)
-			case .FLOOR:
-				rl.DrawRectangle(i32(pos.x), i32(pos.y), TILE_SIZE, TILE_SIZE, rl.LIGHTGRAY)
-			case .DOOR:
-				rl.DrawRectangle(i32(pos.x), i32(pos.y), TILE_SIZE, TILE_SIZE, rl.BROWN)
-			case .OBJECT:
-				rl.DrawCircleV(pos + TILE_SIZE / 2, TILE_SIZE / 4, rl.GOLD)
-			case .EMPTY:
-			// Ne rien dessiner
-			}
+			draw_tile(rs.tile_tex, tile.tex_id, pos, 1.0)
 		}
 	}
-	room_pos := rs.instances[rs.active_room_id].position
-	layout_ := rs.templates[rs.instances[rs.active_room_id].template_id].layout
-	tile_w := f32(layout_.width)
-	tile_h := f32(layout_.height)
-
-	start_x: f32 = clamp(((entity_pos.x - room_pos.x) / TILE_SIZE) - 1, 0, tile_w - 1)
-	end_x: f32 = clamp(((entity_pos.x + 128 - room_pos.x) / TILE_SIZE) + 1, 0, tile_w - 1)
-
-	start_y := clamp(((entity_pos.y - room_pos.y) / TILE_SIZE) - 1, 0, tile_h - 1)
-	end_y := clamp(((entity_pos.y + 128 - room_pos.y) / TILE_SIZE) + 1, 0, tile_h - 1)
-
-	draw_collision_tiles(int(start_x), int(end_x), int(start_y), int(end_y), room_pos)
 }
 
 //
@@ -160,8 +142,11 @@ load_room_from_png :: proc(rs: ^Room_System, path: cstring, pos: v2) -> int {
 	for y in 0 ..< height {
 		for x in 0 ..< width {
 			idx := y * width + x
-			tile_type := color_to_tile_type(pixels[idx])
+			pxl := pixels[idx]
+			tile_type := color_to_tile_type(pxl)
+			tex_id := pxl.r
 			tiles[idx].type = tile_type
+			tiles[idx].tex_id = int(tex_id)
 
 			if tile_type == .DOOR {
 				append(&doors, v2{f32(x), f32(y)})
@@ -197,8 +182,8 @@ load_room_from_png :: proc(rs: ^Room_System, path: cstring, pos: v2) -> int {
 // Conversion couleur -> type de tile
 //
 color_to_tile_type :: proc(c: rl.Color) -> Tile_Type {
-	if c == rl.BLACK do return .WALL
-	if c == rl.GRAY do return .FLOOR
+	if c.r > 0 do return .WALL
+	if c.r == 0 do return .FLOOR
 	if c == rl.WHITE do return .EMPTY
 	if c == rl.GREEN do return .DOOR
 	if c == rl.YELLOW do return .OBJECT
@@ -247,4 +232,26 @@ room_try_change :: proc(rs: ^Room_System, door_position: v2) {
 			}
 		}
 	}
+}
+
+draw_tile :: proc(tex: rl.Texture2D, tile_id: int, screen_pos: v2, scale: f32) {
+	source_size := v2{TILE_SIZE / 4, TILE_SIZE / 4}
+	tiles_per_row := int(tex.width / i32(source_size.x))
+	frame_x := tile_id % tiles_per_row
+	frame_y := tile_id / tiles_per_row
+
+	source := rl.Rectangle {
+		x      = f32(frame_x) * source_size.x,
+		y      = f32(frame_y) * source_size.y,
+		width  = source_size.x,
+		height = source_size.y,
+	}
+	dest := rl.Rectangle {
+		x      = screen_pos.x,
+		y      = screen_pos.y,
+		width  = TILE_SIZE * scale,
+		height = TILE_SIZE * scale,
+	}
+	origin := v2{0, 0}
+	rl.DrawTexturePro(tex, source, dest, origin, 0.0, rl.WHITE)
 }

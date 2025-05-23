@@ -20,7 +20,7 @@ Buttons_System :: struct {
 	text_color: [MAX_BUTTON]rl.Color,
 	state:      [MAX_BUTTON]Button_State,
 	visible:    [MAX_BUTTON]bool,
-	on_click:   [MAX_BUTTON]proc(_: rawptr),
+	on_click:   [MAX_BUTTON]proc(_: rawptr,_:rawptr),
 	user_data:  [MAX_BUTTON]rawptr,
 	count:      u32,
 }
@@ -31,7 +31,7 @@ button_add :: proc(
 	size: v2,
 	text: cstring,
 	base_color, text_color: rl.Color,
-	on_click: proc(_: rawptr),
+	on_click: proc(_: rawptr,_:rawptr),
 	user_data: rawptr,
 ) -> u32 {
 	id := bs.count
@@ -83,7 +83,7 @@ buttons_draw :: proc(bs: ^Buttons_System) {
 		rl.DrawText(bs.text[i], i32(bs.pos[i].x), i32(bs.pos[i].y), 16, bs.text_color[i])
 	}
 }
-buttons_update :: proc(bs: ^Buttons_System) {
+buttons_update :: proc(bs: ^Buttons_System,ss:^Sprites_System) {
 	for i in 0 ..< bs.count {
 		if cord_over_rect(
 			rl.GetMousePosition(),
@@ -98,7 +98,7 @@ buttons_update :: proc(bs: ^Buttons_System) {
 				bs.state[i] = .PRESSED
 			} else do bs.state[i] = .HOVERED
 			if rl.IsMouseButtonPressed(.LEFT) {
-				bs.on_click[i](bs.user_data[i])
+				bs.on_click[i](bs.user_data[i],ss)
 			}
 		} else {
 			bs.state[i] = .NONE
@@ -107,7 +107,7 @@ buttons_update :: proc(bs: ^Buttons_System) {
 }
 
 // Exemple d'event lors du clic
-foo :: proc(dialog_system: rawptr) {
+foo :: proc(dialog_system: rawptr, _: rawptr) {
 	dialog_system := (^Dialogs_System)(dialog_system)
 	dialog_next(dialog_system)
 }

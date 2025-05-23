@@ -11,6 +11,8 @@ v2 :: rl.Vector2
 
 main :: proc() {
 	rl.InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Jason-Jam (JJ)")
+	rl.InitAudioDevice()
+	defer rl.CloseAudioDevice()
 	rl.SetTargetFPS(60)
 	rl.SetExitKey(.KEY_NULL)
 
@@ -20,12 +22,12 @@ main :: proc() {
 	sprites_add(
 		game.ss,
 		v2{10, 10},
-		v2{0.3, 0.3},
+		v2{1, 1},
 		rl.LoadTexture("assets/sprites/sprite_test.png"),
 		v2{2042/8,261},
 		8,
 		0.085,
-		true,
+		false,
 	)
 	// ?
 

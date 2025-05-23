@@ -1,6 +1,7 @@
 package main
 
 import rl "vendor:raylib"
+import "core:fmt"
 MAX_SPRITES :: 256
 
 Sprites_System :: struct {
@@ -66,7 +67,13 @@ sprites_update :: proc(ss: ^Sprites_System) {
 		ss.frame_timer[i] += dt
 		if ss.frame_timer[i] >= ss.frame_delay[i] {
 			ss.frame_timer[i] = 0
-			ss.current_frame[i] = (ss.current_frame[i] + 1) % ss.total_frame[i]
+			if ss.current_frame[i] == ss.total_frame[i] - 1 {
+				ss.visible[i] = false
+				ss.current_frame[i] = 0
+			} else {
+				ss.current_frame[i] = (ss.current_frame[i] + 1) % ss.total_frame[i]
+			}
+
 		}
 	}
 }
@@ -96,4 +103,13 @@ sprites_draw :: proc(ss: ^Sprites_System) {
 		origin := rl.Vector2{0, 0}
 		rl.DrawTexturePro(tex, source_rec, dest_rec, origin, 0.0, rl.WHITE)
 	}
+}
+
+explosion_button :: proc(as: rawptr,ss:rawptr) {
+	ss := (^Sprites_System)(ss)
+	ss.visible[0] = true
+
+	// Ajout de derniere minute
+	sound := rl.LoadSound("assets/explosion.mp3")
+	rl.PlaySound(sound)
 }
