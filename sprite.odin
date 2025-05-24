@@ -104,12 +104,3 @@ sprites_draw :: proc(ss: ^Sprites_System) {
 		rl.DrawTexturePro(tex, source_rec, dest_rec, origin, 0.0, rl.WHITE)
 	}
 }
-
-explosion_button :: proc(as: rawptr,ss:rawptr) {
-	ss := (^Sprites_System)(ss)
-	ss.visible[0] = true
-
-	// Ajout de derniere minute
-	sound := rl.LoadSound("assets/explosion.mp3")
-	rl.PlaySound(sound)
-}

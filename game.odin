@@ -28,7 +28,7 @@ game_init :: proc() -> Game {
 	add_entity(
 		game.es,
 		pos = v2{200, 200},
-		size = v2{64, 64},
+		size = v2{60, 60},
 		speed = 300,
 		color = rl.BLUE,
 		tag = .PLAYER,
@@ -57,16 +57,6 @@ game_init :: proc() -> Game {
 		base_color = rl.ORANGE,
 		text_color = rl.WHITE,
 		on_click = foo,
-		user_data = game.ds,
-	)
-	button_add(
-		game.bs,
-		pos = v2{200, 20},
-		size = v2{70, 50},
-		text = "TRY ME",
-		base_color = rl.ORANGE,
-		text_color = rl.WHITE,
-		on_click = explosion_button,
 		user_data = game.ds,
 	)
 	return game
@@ -100,7 +90,7 @@ game_update :: proc(game: ^Game) {
 		entity_update(game.es, game.rs)
 		buttons_update(game.bs, game.ss)
 		dialog_update(game.ds)
-		room_update(game.rs)
+		room_update(game.rs, &game.es.pos[0])
 		camera_update(
 			game.cs,
 			rl.Rectangle{game.es.pos[0].x, game.es.pos[0].y, game.es.size[0].x, game.es.size[0].y},

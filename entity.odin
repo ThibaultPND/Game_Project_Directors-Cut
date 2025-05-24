@@ -137,7 +137,6 @@ manage_colide :: proc(es: ^Entities_System, rs: ^Room_System, delta: v2, index: 
 						height = TILE_SIZE,
 					},
 				) {
-					//fmt.println("No colide...")
 					continue
 				}
 				dist: f32
@@ -154,15 +153,8 @@ manage_colide :: proc(es: ^Entities_System, rs: ^Room_System, delta: v2, index: 
 				if abs(delta.x) < EPSILON {
 					delta.x = 0.0
 				}
-				fmt.printfln(
-					"Colide on x ! : \nPlayer : %.2f\nTile   : %.2f",
-					test_entity_pos.x,
-					tile_pos.x,
-				)
-				fmt.printfln("  -> New delta.x = %f", delta.x)
 			}
 		}
-		//fmt.printfln("Count = %d", count)
 	}
 
 
